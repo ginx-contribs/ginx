@@ -10,9 +10,8 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/juju/ratelimit v1.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.5.1
-	github.com/spf13/cast v1.6.0
+	github.com/rs/cors v1.10.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.10.0
 )
@@ -40,8 +39,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
-	github.com/rs/cors v1.10.1 // indirect
-	github.com/rs/cors/wrapper/gin v0.0.0-20240228164225-8d33ca4794ea // indirect
 	github.com/shirou/gopsutil/v3 v3.23.2 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
