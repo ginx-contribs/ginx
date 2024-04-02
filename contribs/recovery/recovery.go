@@ -2,8 +2,8 @@ package recovery
 
 import (
 	"errors"
+	"github.com/246859/ginx/pkg/resp"
 	"github.com/246859/ginx/pkg/s2b"
-	"github.com/246859/ginx/resp"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net"

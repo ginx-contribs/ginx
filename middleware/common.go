@@ -6,7 +6,7 @@ import (
 	"github.com/246859/ginx/contribs/cors"
 	"github.com/246859/ginx/contribs/ratelimit"
 	"github.com/246859/ginx/contribs/recovery"
-	"github.com/246859/ginx/resp"
+	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 )

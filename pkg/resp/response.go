@@ -3,7 +3,7 @@ package resp
 import (
 	"errors"
 	"github.com/246859/ginx/constant/status"
-	"github.com/246859/ginx/resp/errs"
+	"github.com/246859/ginx/pkg/resp/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
