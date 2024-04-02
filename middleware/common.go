@@ -31,15 +31,15 @@ func RateLimit(limiter ratelimit.Limiter, errorHandler func(ctx *gin.Context, er
 	return ratelimit.RateLimit(ratelimit.WithLimiter(limiter), ratelimit.WithErrorHandler(errorHandler))
 }
 
-// ResourceNotFoundHandler deals with case of 404
-func ResourceNotFoundHandler() gin.HandlerFunc {
+// NoRoute deals with case of 404
+func NoRoute() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		resp.New(ctx).Status(status.NotFound).Render()
 	}
 }
 
-// MethodAllowHandler deals with case of method not allowed
-func MethodAllowHandler() gin.HandlerFunc {
+// NoMethod deals with case of method not allowed
+func NoMethod() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		resp.New(ctx).Status(status.MethodNotAllowed).Render()
 	}
