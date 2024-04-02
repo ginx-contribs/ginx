@@ -97,7 +97,7 @@ func WithEngine(engine *gin.Engine) Option {
 
 func WithHttpServer(httpserver *http.Server) Option {
 	return func(server *Server) {
-		server.httpserver = httpserver
+		server.HttpServer = httpserver
 	}
 }
 
@@ -145,6 +145,18 @@ func WithMultipartMem(mem int64) Option {
 func WithMaxHeaderBytes(bytes int) Option {
 	return func(server *Server) {
 		server.options.MaxHeaderBytes = bytes
+	}
+}
+
+func WithMaxShutdownWait(timeout time.Duration) Option {
+	return func(server *Server) {
+		server.options.MaxShutdownTimeout = timeout
+	}
+}
+
+func WithMode(mode string) Option {
+	return func(server *Server) {
+		server.options.Mode = mode
 	}
 }
 
