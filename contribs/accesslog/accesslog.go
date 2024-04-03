@@ -44,7 +44,9 @@ type Options struct {
 
 // AccessLog records server access logs
 func AccessLog(options Options) gin.HandlerFunc {
-	options.Msg = "GinX"
+	if options.Msg == "" {
+		options.Msg = "access logs"
+	}
 	logger := options.Logger
 
 	return func(ctx *gin.Context) {
