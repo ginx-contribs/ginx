@@ -92,10 +92,8 @@ func New(options ...Option) *Server {
 		server.options.MaxHeaderBytes = int(size.MB)
 	}
 
-	server.build()
-	// apply global middlewares
-	server.engine.Use(server.middlewares...)
-	server.httpserver.Handler = server.engine
+	server.applyOptions()
+
 	return server
 }
 
@@ -109,8 +107,10 @@ type Server struct {
 
 	engine *gin.Engine
 
+	noRoute  gin.HandlersChain
+	noMethod gin.HandlersChain
 	// global middlewares
-	middlewares []gin.HandlerFunc
+	middlewares gin.HandlersChain
 
 	// hooks func
 	BeforeStarting []HookFn
@@ -222,8 +222,8 @@ func (s *Server) executeHooks(ctx context.Context, hooks ...HookFn) error {
 	return nil
 }
 
-// build http server and engine
-func (s *Server) build() {
+// applyOptions applies options to http server and engine
+func (s *Server) applyOptions() {
 	if s.httpserver == nil {
 		s.httpserver = &http.Server{}
 	}
@@ -259,10 +259,16 @@ func (s *Server) build() {
 			panic(fmt.Errorf("expected: *github.com/gin-gonic/gin.Engine, but got %T", s.httpserver.Handler))
 		}
 	} else {
+		// use engine for httpserver handler
 		s.httpserver.Handler = s.engine
 	}
 
 	if s.engine.MaxMultipartMemory == 0 {
 		s.engine.MaxMultipartMemory = s.options.MaxMultipartMemory
 	}
+
+	// apply middlewares
+	s.engine.Use(s.middlewares...)
+	s.engine.NoMethod(s.noMethod...)
+	s.engine.NoRoute(s.noRoute...)
 }

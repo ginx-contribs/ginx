@@ -59,6 +59,7 @@ type Options struct {
 	MaxShutdownTimeout time.Duration `mapstructure:"maxShutdownTimeout"`
 }
 
+// WithCtx apply the server root context
 func WithCtx(ctx context.Context) Option {
 	return func(server *Server) {
 		server.ctx = ctx
@@ -89,18 +90,39 @@ func WithStopSignals(signals ...os.Signal) Option {
 	}
 }
 
+// WithEngine apply a custom engine
 func WithEngine(engine *gin.Engine) Option {
 	return func(server *Server) {
 		server.engine = engine
 	}
 }
 
+// WithHttpServer apply a custom httpserver
 func WithHttpServer(httpserver *http.Server) Option {
 	return func(server *Server) {
 		server.httpserver = httpserver
 	}
 }
 
+func WithMiddlewares(handlers ...gin.HandlerFunc) Option {
+	return func(server *Server) {
+		server.middlewares = append(server.middlewares, handlers...)
+	}
+}
+
+func WithNoRoute(handlers ...gin.HandlerFunc) Option {
+	return func(server *Server) {
+		server.noRoute = append(server.noRoute, handlers...)
+	}
+}
+
+func WithNoMethod(handlers ...gin.HandlerFunc) Option {
+	return func(server *Server) {
+		server.noMethod = append(server.noMethod, handlers...)
+	}
+}
+
+// WithOptions apply a whole options
 func WithOptions(options Options) Option {
 	return func(server *Server) {
 		server.options = options
@@ -136,12 +158,12 @@ func WithIdleTimeout(timeout time.Duration) Option {
 		server.options.IdleTimeout = timeout
 	}
 }
-
 func WithMultipartMem(mem int64) Option {
 	return func(server *Server) {
 		server.options.MaxMultipartMemory = mem
 	}
 }
+
 func WithMaxHeaderBytes(bytes int) Option {
 	return func(server *Server) {
 		server.options.MaxHeaderBytes = bytes
@@ -163,11 +185,5 @@ func WithMode(mode string) Option {
 func WithTLS(key string, cert string) Option {
 	return func(server *Server) {
 		server.options.TLS = &TLSOptions{Key: key, Cert: cert}
-	}
-}
-
-func WithMiddlewares(handlers ...gin.HandlerFunc) Option {
-	return func(server *Server) {
-		server.middlewares = append(server.middlewares, handlers...)
 	}
 }
