@@ -43,6 +43,8 @@ func Default() *Server {
 func New(options ...Option) *Server {
 
 	server := new(Server)
+	server.metadata = make(map[string]MetaData, 16)
+
 	for _, option := range options {
 		option(server)
 	}
@@ -116,6 +118,10 @@ type Server struct {
 	BeforeStarting []HookFn
 	AfterStarted   []HookFn
 	OnShutdown     []HookFn
+
+	// metadata is a ready-only map during server running, which holds all the route metadata.
+	// It is not thread-safe, should not be modified after server running.
+	metadata map[string]MetaData
 
 	// os stop signals
 	stopSignals []os.Signal
@@ -256,7 +262,7 @@ func (s *Server) applyOptions() {
 			// overlay engine
 			s.engine = engine
 		} else {
-			panic(fmt.Errorf("expected: *github.com/gin-gonic/gin.Engine, but got %T", s.httpserver.Handler))
+			panic(fmt.Errorf("expected: github.com/gin-gonic/*gin.Engine, but got %T", s.httpserver.Handler))
 		}
 	} else {
 		// use engine for httpserver handler
@@ -268,6 +274,7 @@ func (s *Server) applyOptions() {
 	}
 
 	// apply middlewares
+	s.engine.Use(metaDataHandler(s))
 	s.engine.Use(s.middlewares...)
 	s.engine.NoMethod(s.noMethod...)
 	s.engine.NoRoute(s.noRoute...)
