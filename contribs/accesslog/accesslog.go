@@ -19,6 +19,7 @@ func DefaultOptions(logger *slog.Logger, msg string) Options {
 		ShowAgent:        true,
 		ShowURL:          true,
 		ShowPath:         true,
+		ShowRoute:        true,
 		ShowRequestId:    true,
 		ShowRequestSize:  true,
 		ShowResponseSize: true,
@@ -34,6 +35,7 @@ type Options struct {
 	ShowAgent        bool
 	ShowURL          bool
 	ShowPath         bool
+	ShowRoute        bool
 	ShowRequestId    bool
 	ShowRequestSize  bool
 	ShowResponseSize bool
@@ -75,6 +77,10 @@ func AccessLog(options Options) gin.HandlerFunc {
 
 		if options.ShowPath {
 			attrs = append(attrs, slog.String("path", ctx.Request.URL.Path))
+		}
+
+		if options.ShowRoute {
+			attrs = append(attrs, slog.String("route", ctx.FullPath()))
 		}
 
 		if options.ShowRequestSize {
