@@ -34,6 +34,11 @@ func defaultEngine() *gin.Engine {
 	return engine
 }
 
+// Default returns *Server with default middlewares
+func Default() *Server {
+	return New(WithEngine(defaultEngine()))
+}
+
 // New returns a new server instance
 func New(options ...Option) *Server {
 
@@ -88,7 +93,8 @@ func New(options ...Option) *Server {
 	}
 
 	server.build()
-
+	// apply global middlewares
+	server.engine.Use(server.middlewares...)
 	server.httpserver.Handler = server.engine
 	return server
 }
@@ -102,6 +108,9 @@ type Server struct {
 	httpserver *http.Server
 
 	engine *gin.Engine
+
+	// global middlewares
+	middlewares []gin.HandlerFunc
 
 	// hooks func
 	BeforeStarting []HookFn
@@ -219,7 +228,7 @@ func (s *Server) build() {
 		s.httpserver = &http.Server{}
 	}
 	if s.engine == nil {
-		s.engine = defaultEngine()
+		s.engine = gin.New()
 	}
 
 	if s.httpserver.Addr == "" {

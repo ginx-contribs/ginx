@@ -165,3 +165,9 @@ func WithTLS(key string, cert string) Option {
 		server.options.TLS = &TLSOptions{Key: key, Cert: cert}
 	}
 }
+
+func WithMiddlewares(handlers ...gin.HandlerFunc) Option {
+	return func(server *Server) {
+		server.middlewares = append(server.middlewares, handlers...)
+	}
+}
