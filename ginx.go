@@ -7,6 +7,7 @@ import (
 	"github.com/246859/ginx/middleware"
 	"github.com/dstgo/size"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +15,16 @@ import (
 	"syscall"
 	"time"
 )
+
+// GinSilence decide whether to keep gin.DefaultWriter and gin.DefaultErrorWriter silence
+var GinSilence = true
+
+func init() {
+	if GinSilence {
+		gin.DefaultWriter = io.Discard
+		gin.DefaultErrorWriter = io.Discard
+	}
+}
 
 func defaultEngine() *gin.Engine {
 	engine := gin.New()
@@ -35,12 +46,13 @@ func New(options ...Option) *Server {
 		server.ctx = context.Background()
 	}
 
-	if len(server.stopSignals) == 0 {
-		server.stopSignals = []os.Signal{syscall.SIGKILL, syscall.SIGTERM, syscall.SIGINT}
-	}
-
 	if server.options.Mode == "" {
 		server.options.Mode = gin.ReleaseMode
+	}
+	gin.SetMode(server.options.Mode)
+
+	if len(server.stopSignals) == 0 {
+		server.stopSignals = []os.Signal{syscall.SIGKILL, syscall.SIGTERM, syscall.SIGINT}
 	}
 
 	if server.options.Address == "" {
