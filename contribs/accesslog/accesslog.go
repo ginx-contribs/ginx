@@ -74,7 +74,7 @@ func AccessLog(options Options) gin.HandlerFunc {
 		}
 
 		if options.ShowPath {
-			attrs = append(attrs, slog.String("path", ctx.FullPath()))
+			attrs = append(attrs, slog.String("path", ctx.Request.URL.Path))
 		}
 
 		if options.ShowRequestSize {
