@@ -3,9 +3,8 @@ ginx is a simple gin enhancer, which has those features:
 
 * lightweight and more convenient
 * graceful shutdown
-* walk routes and store metadata for each route
 * hooks at `BeforeStarting`, `AfterSarted`, `OnShutdown`
-* integrated with many useful middleware, like `ratelimit`,`cache`, `accesslog`, `recovery` and so on.
+* integrated with many useful middleware, like `ratelimit`,`recovery`, `accesslog`, `rquestId`, `cors` and so on.
 
 ## install
 ```bash
