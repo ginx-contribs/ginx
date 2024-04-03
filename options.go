@@ -91,13 +91,13 @@ func WithStopSignals(signals ...os.Signal) Option {
 
 func WithEngine(engine *gin.Engine) Option {
 	return func(server *Server) {
-		server.Engine = engine
+		server.engine = engine
 	}
 }
 
 func WithHttpServer(httpserver *http.Server) Option {
 	return func(server *Server) {
-		server.HttpServer = httpserver
+		server.httpserver = httpserver
 	}
 }
 

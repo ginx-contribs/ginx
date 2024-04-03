@@ -77,7 +77,7 @@ func New(options ...Option) *Server {
 
 	server.build()
 
-	server.HttpServer.Handler = server.Engine
+	server.httpserver.Handler = server.engine
 	return server
 }
 
@@ -86,29 +86,41 @@ func New(options ...Option) *Server {
 type Server struct {
 	ctx context.Context
 
-	HttpServer *http.Server
-	Engine     *gin.Engine
+	// truly running server
+	httpserver *http.Server
 
+	engine *gin.Engine
+
+	// hooks func
 	BeforeStarting []HookFn
 	AfterStarted   []HookFn
 	OnShutdown     []HookFn
 
+	// os stop signals
 	stopSignals []os.Signal
 
 	options Options
 }
 
+func (s *Server) HttpServer() *http.Server {
+	return s.httpserver
+}
+
+func (s *Server) Engine() *gin.Engine {
+	return s.engine
+}
+
 func (s *Server) Run() error {
 	slog.InfoContext(s.ctx, fmt.Sprintf("server is listening on %v", s.options.Address))
 	if s.options.TLS != nil {
-		return s.HttpServer.ListenAndServeTLS(s.options.TLS.Cert, s.options.TLS.Key)
+		return s.httpserver.ListenAndServeTLS(s.options.TLS.Cert, s.options.TLS.Key)
 	} else {
-		return s.HttpServer.ListenAndServe()
+		return s.httpserver.ListenAndServe()
 	}
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
-	return s.HttpServer.Shutdown(ctx)
+	return s.httpserver.Shutdown(ctx)
 }
 
 // Spin runs the server in another go routine, and listening for os signals to graceful shutdown,
@@ -176,7 +188,7 @@ func (s *Server) Spin() error {
 		}
 	}
 
-	// server finished
+	// server running finished
 	return nil
 }
 
@@ -191,46 +203,45 @@ func (s *Server) executeHooks(ctx context.Context, hooks ...HookFn) error {
 
 // build http server and engine
 func (s *Server) build() {
-	gin.SetMode(s.options.Mode)
-	if s.HttpServer == nil {
-		s.HttpServer = &http.Server{}
+	if s.httpserver == nil {
+		s.httpserver = &http.Server{}
 	}
-	if s.Engine == nil {
-		s.Engine = defaultEngine()
-	}
-
-	if s.HttpServer.Addr == "" {
-		s.HttpServer.Addr = s.options.Address
+	if s.engine == nil {
+		s.engine = defaultEngine()
 	}
 
-	if s.HttpServer.ReadTimeout == 0 {
-		s.HttpServer.ReadTimeout = s.options.ReadTimeout
+	if s.httpserver.Addr == "" {
+		s.httpserver.Addr = s.options.Address
 	}
 
-	if s.HttpServer.ReadHeaderTimeout == 0 {
-		s.HttpServer.ReadHeaderTimeout = s.options.ReadHeaderTimeout
+	if s.httpserver.ReadTimeout == 0 {
+		s.httpserver.ReadTimeout = s.options.ReadTimeout
 	}
 
-	if s.HttpServer.WriteTimeout == 0 {
-		s.HttpServer.WriteTimeout = s.options.WriteTimeout
+	if s.httpserver.ReadHeaderTimeout == 0 {
+		s.httpserver.ReadHeaderTimeout = s.options.ReadHeaderTimeout
 	}
 
-	if s.HttpServer.MaxHeaderBytes == 0 {
-		s.HttpServer.MaxHeaderBytes = s.options.MaxHeaderBytes
+	if s.httpserver.WriteTimeout == 0 {
+		s.httpserver.WriteTimeout = s.options.WriteTimeout
 	}
 
-	if s.HttpServer.Handler != nil {
-		if engine, ok := s.HttpServer.Handler.(*gin.Engine); ok {
+	if s.httpserver.MaxHeaderBytes == 0 {
+		s.httpserver.MaxHeaderBytes = s.options.MaxHeaderBytes
+	}
+
+	if s.httpserver.Handler != nil {
+		if engine, ok := s.httpserver.Handler.(*gin.Engine); ok {
 			// overlay engine
-			s.Engine = engine
+			s.engine = engine
 		} else {
-			panic(fmt.Errorf("expected: *github.com/gin-gonic/gin.Engine, but got %T", s.HttpServer.Handler))
+			panic(fmt.Errorf("expected: *github.com/gin-gonic/gin.Engine, but got %T", s.httpserver.Handler))
 		}
 	} else {
-		s.HttpServer.Handler = s.Engine
+		s.httpserver.Handler = s.engine
 	}
 
-	if s.Engine.MaxMultipartMemory == 0 {
-		s.Engine.MaxMultipartMemory = s.options.MaxMultipartMemory
+	if s.engine.MaxMultipartMemory == 0 {
+		s.engine.MaxMultipartMemory = s.options.MaxMultipartMemory
 	}
 }
