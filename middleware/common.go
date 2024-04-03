@@ -3,13 +3,30 @@ package middleware
 import (
 	"github.com/246859/ginx/constant/status"
 	"github.com/246859/ginx/contribs/accesslog"
+	"github.com/246859/ginx/contribs/cache"
 	"github.com/246859/ginx/contribs/cors"
 	"github.com/246859/ginx/contribs/ratelimit"
 	"github.com/246859/ginx/contribs/recovery"
 	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"log/slog"
+	"time"
 )
+
+// NoRoute deals with case of 404
+func NoRoute() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resp.New(ctx).Status(status.NotFound).Render()
+	}
+}
+
+// NoMethod deals with case of method not allowed
+func NoMethod() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resp.New(ctx).Status(status.MethodNotAllowed).Render()
+	}
+}
 
 // Logger returns the access log handler
 func Logger(logger *slog.Logger, msg string) gin.HandlerFunc {
@@ -31,16 +48,12 @@ func RateLimit(limiter ratelimit.Limiter, errorHandler func(ctx *gin.Context, er
 	return ratelimit.RateLimit(ratelimit.WithLimiter(limiter), ratelimit.WithErrorHandler(errorHandler))
 }
 
-// NoRoute deals with case of 404
-func NoRoute() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		resp.New(ctx).Status(status.NotFound).Render()
-	}
+// CacheMemory returns the cache in memory handler
+func CacheMemory(prefix string, ttl time.Duration) gin.HandlerFunc {
+	return cache.Cache(cache.WithTTL(ttl), cache.WithPrefix(prefix))
 }
 
-// NoMethod deals with case of method not allowed
-func NoMethod() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		resp.New(ctx).Status(status.MethodNotAllowed).Render()
-	}
+// CacheRedis returns the cache in redis handler
+func CacheRedis(prefix string, ttl time.Duration, client *redis.Client) gin.HandlerFunc {
+	return cache.Cache(cache.WithTTL(ttl), cache.WithPrefix(prefix), cache.WithStore(cache.NewRedisStore(client)))
 }
