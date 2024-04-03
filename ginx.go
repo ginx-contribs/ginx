@@ -174,7 +174,7 @@ func (s *Server) Spin() error {
 	// wait for server closed or stop signal
 	select {
 	case <-notifyContext.Done():
-		slog.InfoContext(s.ctx, "received stop signal, ready to shutdown")
+		slog.InfoContext(s.ctx, fmt.Sprintf("received stop signal, ready to shutdown in %s", s.options.MaxShutdownTimeout.String()))
 	case err := <-runCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.ErrorContext(s.ctx, "server run failed", slog.Any("error", err))
