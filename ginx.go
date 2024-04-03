@@ -132,7 +132,7 @@ func (s *Server) Engine() *gin.Engine {
 }
 
 func (s *Server) Run() error {
-	slog.InfoContext(s.ctx, fmt.Sprintf("server is listening on %v", s.options.Address))
+	slog.InfoContext(s.ctx, fmt.Sprintf("[Ginx] server is listening on %v", s.options.Address))
 	if s.options.TLS != nil {
 		return s.httpserver.ListenAndServeTLS(s.options.TLS.Cert, s.options.TLS.Key)
 	} else {
@@ -150,7 +150,7 @@ func (s *Server) Spin() error {
 	notifyContext, signalCancel := signal.NotifyContext(s.ctx, s.stopSignals...)
 	defer signalCancel()
 
-	slog.Debug("before starting hooks")
+	slog.Debug("[Ginx] before starting hooks")
 	// execute before starting hooks
 	err := s.executeHooks(notifyContext, s.BeforeStarting...)
 	if err != nil {
@@ -164,7 +164,7 @@ func (s *Server) Spin() error {
 		close(runCh)
 	}()
 
-	slog.Debug("after starting hooks")
+	slog.Debug("[Ginx] after starting hooks")
 	// execute after started hooks
 	err = s.executeHooks(notifyContext, s.AfterStarted...)
 	if err != nil {
@@ -174,12 +174,12 @@ func (s *Server) Spin() error {
 	// wait for server closed or stop signal
 	select {
 	case <-notifyContext.Done():
-		slog.InfoContext(s.ctx, fmt.Sprintf("received stop signal, ready to shutdown in %s", s.options.MaxShutdownTimeout.String()))
+		slog.InfoContext(s.ctx, fmt.Sprintf("[Ginx] received stop signal, will shutdown in %s at latest", s.options.MaxShutdownTimeout.String()))
 	case err := <-runCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.ErrorContext(s.ctx, "server run failed", slog.Any("error", err))
+			slog.ErrorContext(s.ctx, "[Ginx] running failed", slog.Any("error", err))
 		} else {
-			slog.InfoContext(s.ctx, "http server closed")
+			slog.InfoContext(s.ctx, "[Ginx] server closed")
 		}
 	}
 
@@ -191,7 +191,7 @@ func (s *Server) Spin() error {
 	_ = s.Shutdown(timeoutCtx)
 
 	go func() {
-		slog.Debug("on shutdown hooks")
+		slog.Debug("[Ginx] on shutdown hooks")
 		shutdownCh <- s.executeHooks(timeoutCtx, s.OnShutdown...)
 		close(shutdownCh)
 	}()
@@ -199,13 +199,13 @@ func (s *Server) Spin() error {
 	// wait timeout for execute shutdown hooks
 	select {
 	case <-timeoutCtx.Done():
-		slog.ErrorContext(s.ctx, "shutdown timeout")
+		slog.ErrorContext(s.ctx, "[Ginx] shutdown timeout")
 	case err := <-shutdownCh:
 		if err != nil {
-			slog.ErrorContext(s.ctx, "shutdown error", slog.Any("error", err))
+			slog.ErrorContext(s.ctx, "[Ginx] shutdown error", slog.Any("error", err))
 			return err
 		} else {
-			slog.InfoContext(s.ctx, "server shutdown")
+			slog.InfoContext(s.ctx, "[Ginx] server shutdown")
 		}
 	}
 
