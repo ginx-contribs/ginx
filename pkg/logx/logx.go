@@ -3,11 +3,12 @@ package logx
 import (
 	"fmt"
 	"github.com/dstgo/filebox"
+	"github.com/lmittmann/tint"
 	"io"
 	"log/slog"
 	"os"
 	"slices"
-	"strings"
+	"time"
 )
 
 const (
@@ -18,16 +19,18 @@ const (
 // Options represents logger configuration
 type Options struct {
 	Output string `mapstructure:"output"`
-	Level  string `mapstructure:"level"`
+	// Log level, default INFO
+	Level string `mapstructure:"level"`
+	// TEXT or JSON
 	Format string `mapstructure:"format"`
-	Source bool   `mapstructure:"source"`
-
+	// whether to show source files
+	Source bool `mapstructure:"source"`
+	// custom time format
+	TimeFormat string `mapstructure:"timeFormat"`
+	// color log only available in TEXT format
+	NoColor bool `mapstructure:"color"`
+	// attributes replace func
 	ReplaceAttr func(groups []string, a slog.Attr) slog.Attr
-}
-
-func defaultReplaceAttr(groups []string, a slog.Attr) slog.Attr {
-	a.Key = strings.ToUpper(a.Key)
-	return a
 }
 
 type Option func(options *Options)
@@ -50,9 +53,21 @@ func WithFormat(format string) Option {
 	}
 }
 
-func WithSource(source bool) Option {
+func WithSource() Option {
 	return func(options *Options) {
-		options.Source = source
+		options.Source = true
+	}
+}
+
+func WithTimeFormat(format string) Option {
+	return func(options *Options) {
+		options.TimeFormat = format
+	}
+}
+
+func WithColor() Option {
+	return func(options *Options) {
+		options.NoColor = false
 	}
 }
 
@@ -91,28 +106,6 @@ func (l *Logger) Close() error {
 	return nil
 }
 
-// NewTextLogger return a text logger
-func NewTextLogger(output string, level string, source bool) (*Logger, error) {
-	logger, err := New(
-		WithOutput(output),
-		WithFormat(TextFormat),
-		WithLevel(level),
-		WithSource(source),
-	)
-	return logger, err
-}
-
-// NewJsonLogger return a json logger
-func NewJsonLogger(output string, level string, source bool) (*Logger, error) {
-	logger, err := New(
-		WithOutput(output),
-		WithFormat(JSONFormat),
-		WithLevel(level),
-		WithSource(source),
-	)
-	return logger, err
-}
-
 // New return a logger with options
 func New(opts ...Option) (*Logger, error) {
 
@@ -133,6 +126,10 @@ func New(opts ...Option) (*Logger, error) {
 		opt.Format = TextFormat
 	} else if !slices.Contains([]string{TextFormat, JSONFormat}, opt.Format) {
 		return nil, fmt.Errorf("invalid log format: %s", opt.Format)
+	}
+
+	if opt.TimeFormat == "" {
+		opt.TimeFormat = time.DateTime
 	}
 
 	var levelvar slog.LevelVar
@@ -156,14 +153,29 @@ func New(opts ...Option) (*Logger, error) {
 	}
 
 	handlerOpt := &slog.HandlerOptions{
-		AddSource:   opt.Source,
-		Level:       logger.level,
-		ReplaceAttr: opt.ReplaceAttr,
+		AddSource: opt.Source,
+		Level:     logger.level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case slog.TimeKey:
+				a.Value = slog.AnyValue(a.Value.Time().Format(opt.TimeFormat))
+			}
+			if opt.ReplaceAttr != nil {
+				return opt.ReplaceAttr(groups, a)
+			}
+			return a
+		},
 	}
 
 	var handler slog.Handler
 	if opt.Format == TextFormat {
-		handler = slog.NewTextHandler(logger.writer, handlerOpt)
+		handler = tint.NewHandler(logger.writer, &tint.Options{
+			AddSource:   opt.Source,
+			Level:       logger.level,
+			ReplaceAttr: handlerOpt.ReplaceAttr,
+			TimeFormat:  opt.TimeFormat,
+			NoColor:     opt.NoColor,
+		})
 	} else {
 		handler = slog.NewJSONHandler(logger.writer, handlerOpt)
 	}
