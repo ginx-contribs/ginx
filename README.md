@@ -1,8 +1,9 @@
 # ginx
-ginx is a simple gin enhancer, which has those features:
+ginx is a simple gin enhancer, features as follows:
 
 * lightweight and more convenient
 * graceful shutdown
+* support walk router and store metadata
 * hooks at `BeforeStarting`, `AfterSarted`, `OnShutdown`
 * integrated with many useful middleware, like `ratelimit`,`recovery`, `accesslog`, `rquestId`, `cors` and so on.
 
