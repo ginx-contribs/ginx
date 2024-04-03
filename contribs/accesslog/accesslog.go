@@ -114,12 +114,13 @@ func roundSize(s int) size.Size {
 		return size.NewInt(0, size.B)
 	}
 	bodysize := size.NewInt(s, size.B)
-	if size.Unit(s) > size.KB {
-		bodysize = bodysize.To(size.KB)
+
+	if size.Unit(s) > size.GB {
+		bodysize = bodysize.To(size.GB)
 	} else if size.Unit(s) > size.MB {
 		bodysize = bodysize.To(size.MB)
-	} else if size.Unit(s) > size.GB {
-		bodysize = bodysize.To(size.GB)
+	} else if size.Unit(s) > size.KB {
+		bodysize = bodysize.To(size.KB)
 	}
 	return bodysize
 }
@@ -128,21 +129,21 @@ func roundDuration(duration time.Duration) string {
 	unit := "s"
 	base := time.Second
 
-	if duration > time.Nanosecond {
-		unit = "ns"
-		base = time.Nanosecond
-	} else if duration > time.Microsecond {
-		unit = "µs"
-		base = time.Microsecond
-	} else if duration > time.Millisecond {
-		unit = "ms"
-		base = time.Millisecond
+	if duration > time.Minute {
+		unit = "min"
+		base = time.Minute
 	} else if duration > time.Second {
 		unit = "ns"
 		base = time.Second
-	} else if duration > time.Minute {
-		unit = "min"
-		base = time.Minute
+	} else if duration > time.Millisecond {
+		unit = "ms"
+		base = time.Millisecond
+	} else if duration > time.Microsecond {
+		unit = "µs"
+		base = time.Microsecond
+	} else if duration > time.Nanosecond {
+		unit = "ns"
+		base = time.Nanosecond
 	}
 
 	return fmt.Sprintf("%.2f%s", float64(duration)/float64(base), unit)
