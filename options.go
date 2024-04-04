@@ -26,6 +26,9 @@ type Options struct {
 	// in the form "host:port". If empty, ":http" (port 80) is used
 	Address string `mapstructure:"address"`
 
+	// prefix in log records
+	LogPrefix string `mapstructure:"logPrefix"`
+
 	// ReadTimeout is the maximum duration for reading the entire
 	// request, including the body. A zero or negative value means
 	// there will be no timeout.
@@ -126,6 +129,12 @@ func WithNoMethod(handlers ...gin.HandlerFunc) Option {
 func WithOptions(options Options) Option {
 	return func(server *Server) {
 		server.options = options
+	}
+}
+
+func WithLogPrefix(prefix string) Option {
+	return func(server *Server) {
+		server.options.LogPrefix = prefix
 	}
 }
 
