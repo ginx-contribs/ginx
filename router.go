@@ -64,7 +64,11 @@ func (group *RouterGroup) getMeta() MetaData {
 	return group.s.metadata[routeKey]
 }
 
-func (group *RouterGroup) Group(path string, meta M, handlers ...gin.HandlerFunc) *RouterGroup {
+func (group *RouterGroup) Group(path string, handlers ...gin.HandlerFunc) *RouterGroup {
+	return group.MGroup(path, nil, handlers...)
+}
+
+func (group *RouterGroup) MGroup(path string, meta M, handlers ...gin.HandlerFunc) *RouterGroup {
 	// register route
 	newGroup := group.current.Group(path, handlers...)
 	// register metadata
@@ -105,34 +109,63 @@ func (group *RouterGroup) Match(methods []string, path string, meta M, handlers 
 	return hs
 }
 
-func (group *RouterGroup) GET(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MGET(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Get, path, meta, handlers...)
 }
 
-func (group *RouterGroup) POST(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MPOST(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Post, path, meta, handlers...)
 }
 
-func (group *RouterGroup) DELETE(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MDELETE(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Delete, path, meta, handlers...)
 }
 
-func (group *RouterGroup) PUT(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MPUT(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Put, path, meta, handlers...)
 }
 
-func (group *RouterGroup) OPTIONS(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MOPTIONS(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Options, path, meta, handlers...)
 }
 
-func (group *RouterGroup) HEAD(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
+func (group *RouterGroup) MHEAD(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
 	return group.Handle(methods.Options, path, meta, handlers...)
 }
 
-func (group *RouterGroup) Any(path string, meta M, handlers ...gin.HandlerFunc) []*RouterHandler {
+func (group *RouterGroup) MAny(path string, meta M, handlers ...gin.HandlerFunc) []*RouterHandler {
 	return group.Match(allowMethods, path, meta, handlers...)
 }
 
+func (group *RouterGroup) GET(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Get, path, nil, handlers...)
+}
+
+func (group *RouterGroup) POST(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Post, path, nil, handlers...)
+}
+
+func (group *RouterGroup) DELETE(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Delete, path, nil, handlers...)
+}
+
+func (group *RouterGroup) PUT(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Put, path, nil, handlers...)
+}
+
+func (group *RouterGroup) OPTIONS(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Options, path, nil, handlers...)
+}
+
+func (group *RouterGroup) HEAD(path string, handlers ...gin.HandlerFunc) *RouterHandler {
+	return group.Handle(methods.Options, path, nil, handlers...)
+}
+
+func (group *RouterGroup) Any(path string, handlers ...gin.HandlerFunc) []*RouterHandler {
+	return group.Match(allowMethods, path, nil, handlers...)
+}
+
+// RouteInfo includes basic router information, it will be passed to walkFn in *RouterGroup.Walk.
 type RouteInfo struct {
 	IsGroup bool
 	Group   *RouteInfo
