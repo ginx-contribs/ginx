@@ -42,9 +42,9 @@ func RateLimit(opts ...Option) gin.HandlerFunc {
 		options.ErrorHandler = func(ctx *gin.Context, err error) {
 			if err != nil {
 				if errors.Is(err, ErrRateLimitExceed) { // rate limit exceeded
-					resp.Fail(ctx).Status(status.TooManyRequests).Error(err).Render()
+					resp.Fail(ctx).Status(status.TooManyRequests).Error(err).JSON()
 				} else { // internal server error
-					resp.Fail(ctx).Status(http.StatusInternalServerError).Error(err).Render()
+					resp.Fail(ctx).Status(http.StatusInternalServerError).Error(err).JSON()
 				}
 				ctx.Abort()
 			}

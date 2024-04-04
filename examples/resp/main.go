@@ -17,7 +17,7 @@ func main() {
 	// 	 "msg": "OK"
 	// }
 	root.GET("/hello", nil, func(ctx *gin.Context) {
-		resp.Ok(ctx).Status(status.OK).Msg(status.OK.String()).Data("hello world!").Render()
+		resp.Ok(ctx).Status(status.OK).Msg(status.OK.String()).Data("hello world!").JSON()
 	})
 	err := server.Spin()
 	if err != nil {

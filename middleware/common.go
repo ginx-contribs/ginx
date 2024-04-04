@@ -17,14 +17,14 @@ import (
 // NoRoute deals with case of 404
 func NoRoute() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resp.New(ctx).Status(status.NotFound).Render()
+		resp.New(ctx).Status(status.NotFound).JSON()
 	}
 }
 
 // NoMethod deals with case of method not allowed
 func NoMethod() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resp.New(ctx).Status(status.MethodNotAllowed).Render()
+		resp.New(ctx).Status(status.MethodNotAllowed).JSON()
 	}
 }
 

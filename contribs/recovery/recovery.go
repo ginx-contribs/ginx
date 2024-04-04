@@ -46,7 +46,7 @@ func Recovery(opts ...Option) gin.HandlerFunc {
 	if options.Handler == nil {
 		options.Handler = func(ctx *gin.Context, logger *slog.Logger, err any) {
 			options.Logger.ErrorContext(ctx, "[Panic Recovered]", slog.Any("error", err), slog.String("stack", s2b.BytesToString(debug.Stack())))
-			resp.Fail(ctx).Status(http.StatusInternalServerError).Render()
+			resp.Fail(ctx).Status(http.StatusInternalServerError).JSON()
 			ctx.Abort()
 		}
 	}

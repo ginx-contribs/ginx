@@ -8,12 +8,37 @@ import (
 	"net/http"
 )
 
+func New(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx}
+}
+
+// Ok response with status code 200
+func Ok(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx, status: status.OK}
+}
+
+// Fail response with status code 400
+func Fail(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx, status: status.BadRequest}
+}
+
+// Forbidden response with status code 403
+func Forbidden(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx, status: status.Forbidden}
+}
+
+// UnAuthorized response with status code 401
+func UnAuthorized(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx, status: status.Forbidden}
+}
+
 // Response represents a http json response
 type Response struct {
 	body struct {
-		Code int    `json:"code,omitempty"`
-		Data any    `json:"data,omitempty"`
-		Msg  string `json:"msg,omitempty"`
+		Code  int    `json:"code,omitempty"`
+		Data  any    `json:"data,omitempty"`
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"error,omitempty"`
 	}
 
 	status status.Status
@@ -47,10 +72,11 @@ func (resp *Response) Status(status status.Status) *Response {
 	return resp
 }
 
-func (resp *Response) Render() {
+// render the response body
+func (resp *Response) render() {
 	ctx := resp.ctx
 	if ctx == nil {
-		return
+		panic("nil *gin.Context in response")
 	}
 
 	if resp.body.Code == 0 {
@@ -64,45 +90,45 @@ func (resp *Response) Render() {
 			resp.status = statusErr.Status
 		}
 
-		// overlay the body msg
-		if resp.body.Msg == "" {
-			if statusErr.Status != http.StatusInternalServerError {
-				resp.body.Msg = statusErr.Error()
+		if resp.body.Error == "" {
+			if resp.status != http.StatusInternalServerError {
+				resp.body.Error = statusErr.Error()
 			} else {
-				resp.body.Msg = status.InternalServerError.String()
+				// do not expose error msg for internal error,
+				// it will be passed to the context, and will be processed by others
+				resp.body.Error = status.InternalServerError.String()
 			}
 		}
 		resp.ctx.Error(resp.err)
 	}
 
-	// fall back message
-	if resp.status.Code() >= 300 && resp.body.Msg == "" {
-		resp.body.Msg = resp.status.String()
+	// fall back error msg
+	if resp.status.Code() >= 300 && resp.body.Error == "" {
+		resp.body.Error = resp.status.String()
 	}
-
-	ctx.JSON(resp.status.Code(), resp.body)
 }
 
-func New(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx}
+func (resp *Response) JSON() {
+	resp.render()
+	resp.ctx.JSON(resp.status.Code(), resp.body)
 }
 
-// Ok response with status code 200
-func Ok(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.OK}
+func (resp *Response) XML() {
+	resp.render()
+	resp.ctx.XML(resp.status.Code(), resp.body)
 }
 
-// Fail response with status code 400
-func Fail(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.BadRequest}
+func (resp *Response) YAML() {
+	resp.render()
+	resp.ctx.YAML(resp.status.Code(), resp.body)
 }
 
-// Forbidden response with status code 403
-func Forbidden(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.Forbidden}
+func (resp *Response) TOML() {
+	resp.render()
+	resp.ctx.TOML(resp.status.Code(), resp.body)
 }
 
-// UnAuthorized response with status code 401
-func UnAuthorized(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.Forbidden}
+func (resp *Response) ProtoBuf() {
+	resp.render()
+	resp.ctx.ProtoBuf(resp.status.Code(), resp.body)
 }
