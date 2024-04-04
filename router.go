@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/246859/ginx/constant/methods"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"slices"
 )
 
@@ -107,27 +106,27 @@ func (group *RouterGroup) Match(methods []string, path string, meta M, handlers 
 }
 
 func (group *RouterGroup) GET(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodGet, path, meta, handlers...)
+	return group.Handle(methods.Get, path, meta, handlers...)
 }
 
 func (group *RouterGroup) POST(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodPost, path, meta, handlers...)
+	return group.Handle(methods.Post, path, meta, handlers...)
 }
 
 func (group *RouterGroup) DELETE(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodDelete, path, meta, handlers...)
+	return group.Handle(methods.Delete, path, meta, handlers...)
 }
 
 func (group *RouterGroup) PUT(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodPut, path, meta, handlers...)
+	return group.Handle(methods.Put, path, meta, handlers...)
 }
 
 func (group *RouterGroup) OPTIONS(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodOptions, path, meta, handlers...)
+	return group.Handle(methods.Options, path, meta, handlers...)
 }
 
 func (group *RouterGroup) HEAD(path string, meta M, handlers ...gin.HandlerFunc) *RouterHandler {
-	return group.Handle(http.MethodHead, path, meta, handlers...)
+	return group.Handle(methods.Options, path, meta, handlers...)
 }
 
 func (group *RouterGroup) Any(path string, meta M, handlers ...gin.HandlerFunc) []*RouterHandler {

@@ -5,7 +5,6 @@ import (
 	"github.com/246859/ginx/constant/status"
 	"github.com/246859/ginx/pkg/resp/errs"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func New(ctx *gin.Context) *Response {
@@ -91,7 +90,7 @@ func (resp *Response) render() {
 		}
 
 		if resp.body.Error == "" {
-			if resp.status != http.StatusInternalServerError {
+			if resp.status != status.InternalServerError {
 				resp.body.Error = statusErr.Error()
 			} else {
 				// do not expose error msg for internal error,

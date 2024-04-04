@@ -5,7 +5,6 @@ import (
 	"github.com/246859/ginx/constant/status"
 	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type Options struct {
@@ -44,7 +43,7 @@ func RateLimit(opts ...Option) gin.HandlerFunc {
 				if errors.Is(err, ErrRateLimitExceed) { // rate limit exceeded
 					resp.Fail(ctx).Status(status.TooManyRequests).Error(err).JSON()
 				} else { // internal server error
-					resp.Fail(ctx).Status(http.StatusInternalServerError).Error(err).JSON()
+					resp.Fail(ctx).Status(status.InternalServerError).Error(err).JSON()
 				}
 				ctx.Abort()
 			}

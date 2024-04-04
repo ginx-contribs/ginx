@@ -1,9 +1,10 @@
 package cors
 
 import (
+	"github.com/246859/ginx/constant/methods"
+	"github.com/246859/ginx/constant/status"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
-	"net/http"
 )
 
 // Options is a configuration container to setup the CORS middleware.
@@ -21,10 +22,10 @@ func (c corsWrapper) build() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		c.HandlerFunc(ctx.Writer, ctx.Request)
 		if !c.optionPassthrough &&
-			ctx.Request.Method == http.MethodOptions &&
+			ctx.Request.Method == methods.Options &&
 			ctx.GetHeader("Access-Control-Request-Method") != "" {
 			// Abort processing next Gin middlewares.
-			ctx.AbortWithStatus(http.StatusOK)
+			ctx.AbortWithStatus(status.OK.Code())
 		}
 	}
 }

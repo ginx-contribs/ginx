@@ -2,12 +2,12 @@ package recovery
 
 import (
 	"errors"
+	"github.com/246859/ginx/constant/status"
 	"github.com/246859/ginx/pkg/resp"
 	"github.com/246859/ginx/pkg/s2b"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net"
-	"net/http"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -46,7 +46,7 @@ func Recovery(opts ...Option) gin.HandlerFunc {
 	if options.Handler == nil {
 		options.Handler = func(ctx *gin.Context, logger *slog.Logger, err any) {
 			options.Logger.ErrorContext(ctx, "[Panic Recovered]", slog.Any("error", err), slog.String("stack", s2b.BytesToString(debug.Stack())))
-			resp.Fail(ctx).Status(http.StatusInternalServerError).JSON()
+			resp.Fail(ctx).Status(status.InternalServerError).JSON()
 			ctx.Abort()
 		}
 	}
