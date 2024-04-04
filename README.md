@@ -42,6 +42,8 @@ package main
 import (
 	"fmt"
 	"github.com/246859/ginx"
+	"github.com/gin-gonic/gin"
+	"log"
 	"log/slog"
 )
 
@@ -50,19 +52,34 @@ func main() {
 	root := server.RouterGroup()
 	root.MGET("login", ginx.M{{"role", "guest"}, {"limit", 5}})
 	user := root.MGroup("user", nil)
-	user.MGET("info", ginx.M{{"role", "user"}}, nil)
+	user.MGET("info", ginx.M{{"role", "user"}}, func(ctx *gin.Context) {
+		// get metadata from context
+		metaData := ginx.MetaFromCtx(ctx)
+		slog.Info(metaData.ShouldGet("role").String())
+	})
 
+	// walk root router
 	root.Walk(func(info ginx.RouteInfo) {
 		slog.Info(fmt.Sprintf("%s %s", info.FullPath, info.Meta))
 	})
+
+	err := server.Spin()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 output
 ```
-2024/04/04 12:23:45 INFO / {}
-2024/04/04 12:23:45 INFO /login {role:guest,limit:5}
-2024/04/04 12:23:45 INFO /user {}
-2024/04/04 12:23:45 INFO /user/info {role:user} 
+2024/04/04 12:49:16 INFO / {}
+2024/04/04 12:49:16 INFO /login {role:guest,limit:5}
+2024/04/04 12:49:16 INFO /user {}
+2024/04/04 12:49:16 INFO /user/info {role:user}
+2024/04/04 12:49:16 INFO [GinX] server is listening on :8080
+2024/04/04 12:49:27 INFO user
+2024/04/04 12:49:27 INFO [GinX] status=200 method=GET cost=201.60µs ip=127.0.0.1 url=/user/info path=/user/info route=/user/info request-size=720B response-size=0B
+2024/04/04 12:51:16 INFO [GinX] received stop signal, it will shutdown in 5s at latest
+2024/04/04 12:51:16 INFO [GinX] server shutdown
 ```
 
 ### use middleware
