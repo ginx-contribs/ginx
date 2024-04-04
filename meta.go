@@ -151,6 +151,19 @@ func (m MetaData) Get(key string) (V, bool) {
 	return V{Key: key, Val: v}, true
 }
 
+func (m MetaData) ShouldGet(key string) V {
+	val, _ := m.Get(key)
+	return val
+}
+
+func (m MetaData) MustGet(key string) V {
+	val, e := m.Get(key)
+	if !e {
+		panic(fmt.Sprintf("not found in metdata: %s", key))
+	}
+	return val
+}
+
 func (m MetaData) Has(key string) bool {
 	_, has := m.Get(key)
 	return has
