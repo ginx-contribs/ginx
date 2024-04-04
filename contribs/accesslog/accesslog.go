@@ -16,7 +16,7 @@ func DefaultOptions(logger *slog.Logger, msg string) Options {
 		Msg:              msg,
 		ShowCost:         true,
 		ShowIp:           true,
-		ShowAgent:        true,
+		ShowAgent:        false,
 		ShowURL:          true,
 		ShowPath:         true,
 		ShowRoute:        true,
@@ -69,10 +69,6 @@ func AccessLog(options Options) gin.HandlerFunc {
 			attrs = append(attrs, slog.String("ip", ctx.ClientIP()))
 		}
 
-		if options.ShowAgent {
-			attrs = append(attrs, slog.String("agent", ctx.Request.UserAgent()))
-		}
-
 		if options.ShowURL {
 			attrs = append(attrs, slog.String("url", ctx.Request.RequestURI))
 		}
@@ -92,6 +88,10 @@ func AccessLog(options Options) gin.HandlerFunc {
 
 		if options.ShowResponseSize {
 			attrs = append(attrs, slog.String("response-size", roundSize(int(ctx.Writer.Size())).String()))
+		}
+
+		if options.ShowAgent {
+			attrs = append(attrs, slog.String("agent", ctx.Request.UserAgent()))
 		}
 
 		if options.ShowRequestId {
