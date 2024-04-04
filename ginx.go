@@ -32,7 +32,7 @@ func Default() *Server {
 		WithNoRoute(middleware.NoRoute()),
 		WithNoMethod(middleware.NoMethod(allowMethods...)),
 		WithMiddlewares(
-			middleware.Logger(slog.Default(), "[GinX]"),
+			middleware.Logger(slog.Default(), logPrefix),
 			middleware.Recovery(slog.Default(), nil),
 		),
 	)
@@ -50,6 +50,10 @@ func New(options ...Option) *Server {
 
 	if server.ctx == nil {
 		server.ctx = context.Background()
+	}
+
+	if server.options.LogPrefix == "" {
+		server.options.LogPrefix = logPrefix
 	}
 
 	if server.options.Mode == "" {
@@ -137,7 +141,7 @@ func (s *Server) Engine() *gin.Engine {
 }
 
 func (s *Server) Run() error {
-	slog.InfoContext(s.ctx, fmt.Sprintf("[Ginx] server is listening on %v", s.options.Address))
+	infoLog(s.ctx, s.options.LogPrefix, fmt.Sprintf("server is listening on %v", s.options.Address))
 	if s.options.TLS != nil {
 		return s.httpserver.ListenAndServeTLS(s.options.TLS.Cert, s.options.TLS.Key)
 	} else {
@@ -155,7 +159,7 @@ func (s *Server) Spin() error {
 	notifyContext, signalCancel := signal.NotifyContext(s.ctx, s.stopSignals...)
 	defer signalCancel()
 
-	slog.Debug("[Ginx] before starting hooks")
+	debugLog(s.ctx, s.options.LogPrefix, "before starting hooks")
 	// execute before starting hooks
 	err := s.executeHooks(notifyContext, s.BeforeStarting...)
 	if err != nil {
@@ -169,7 +173,7 @@ func (s *Server) Spin() error {
 		close(runCh)
 	}()
 
-	slog.Debug("[Ginx] after starting hooks")
+	debugLog(s.ctx, s.options.LogPrefix, "after starting hooks")
 	// execute after started hooks
 	err = s.executeHooks(notifyContext, s.AfterStarted...)
 	if err != nil {
@@ -179,12 +183,12 @@ func (s *Server) Spin() error {
 	// wait for server closed or stop signal
 	select {
 	case <-notifyContext.Done():
-		slog.InfoContext(s.ctx, fmt.Sprintf("[Ginx] received stop signal, will shutdown in %s at latest", s.options.MaxShutdownTimeout.String()))
+		infoLog(s.ctx, s.options.LogPrefix, fmt.Sprintf("received stop signal, it will shutdown in %s at latest", s.options.MaxShutdownTimeout.String()))
 	case err := <-runCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.ErrorContext(s.ctx, "[Ginx] running failed", slog.Any("error", err))
+			errorLog(s.ctx, s.options.LogPrefix, "running failed", slog.Any("error", err))
 		} else {
-			slog.InfoContext(s.ctx, "[Ginx] server closed")
+			infoLog(s.ctx, s.options.LogPrefix, "server closed")
 		}
 	}
 
@@ -196,7 +200,7 @@ func (s *Server) Spin() error {
 	_ = s.Shutdown(timeoutCtx)
 
 	go func() {
-		slog.Debug("[Ginx] on shutdown hooks")
+		debugLog(s.ctx, s.options.LogPrefix, "on shutdown hooks")
 		shutdownCh <- s.executeHooks(timeoutCtx, s.OnShutdown...)
 		close(shutdownCh)
 	}()
@@ -204,13 +208,13 @@ func (s *Server) Spin() error {
 	// wait timeout for execute shutdown hooks
 	select {
 	case <-timeoutCtx.Done():
-		slog.ErrorContext(s.ctx, "[Ginx] shutdown timeout")
+		errorLog(s.ctx, s.options.LogPrefix, "shutdown timeout")
 	case err := <-shutdownCh:
 		if err != nil {
-			slog.ErrorContext(s.ctx, "[Ginx] shutdown error", slog.Any("error", err))
+			errorLog(s.ctx, s.options.LogPrefix, "shutdown error", slog.Any("error", err))
 			return err
 		} else {
-			slog.InfoContext(s.ctx, "[Ginx] server shutdown")
+			infoLog(s.ctx, s.options.LogPrefix, "server shutdown")
 		}
 	}
 
