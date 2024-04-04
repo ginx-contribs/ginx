@@ -26,17 +26,16 @@ func init() {
 	}
 }
 
-func defaultEngine() *gin.Engine {
-	engine := gin.New()
-	engine.NoRoute(middleware.NoRoute())
-	engine.NoMethod(middleware.NoMethod())
-	engine.Use(middleware.Logger(slog.Default(), "GinX"), middleware.Recovery(slog.Default(), nil))
-	return engine
-}
-
 // Default returns *Server with default middlewares
 func Default() *Server {
-	return New(WithEngine(defaultEngine()))
+	return New(
+		WithNoRoute(middleware.NoRoute()),
+		WithNoMethod(middleware.NoMethod(allowMethods...)),
+		WithMiddlewares(
+			middleware.Logger(slog.Default(), "[GinX]"),
+			middleware.Recovery(slog.Default(), nil),
+		),
+	)
 }
 
 // New returns a new server instance
