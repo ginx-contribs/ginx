@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"log/slog"
+	"slices"
 	"time"
 )
 
@@ -22,9 +23,11 @@ func NoRoute() gin.HandlerFunc {
 }
 
 // NoMethod deals with case of method not allowed
-func NoMethod() gin.HandlerFunc {
+func NoMethod(methods ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resp.New(ctx).Status(status.MethodNotAllowed).JSON()
+		if !slices.Contains(methods, ctx.Request.Method) {
+			resp.New(ctx).Status(status.MethodNotAllowed).JSON()
+		}
 	}
 }
 
