@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ginx-contribs/ginx/constant/status"
 	"github.com/ginx-contribs/ginx/pkg/resp"
-	"github.com/ginx-contribs/ginx/pkg/s2b"
+	"github.com/ginx-contribs/str2bytes"
 	"log/slog"
 	"net"
 	"os"
@@ -45,7 +45,7 @@ func Recovery(opts ...Option) gin.HandlerFunc {
 
 	if options.Handler == nil {
 		options.Handler = func(ctx *gin.Context, logger *slog.Logger, err any) {
-			options.Logger.ErrorContext(ctx, "[Panic Recovered]", slog.Any("error", err), slog.String("stack", s2b.BytesToString(debug.Stack())))
+			options.Logger.ErrorContext(ctx, "[Panic Recovered]", slog.Any("error", err), slog.String("stack", str2bytes.Bytes2Str(debug.Stack())))
 			resp.Fail(ctx).Status(status.InternalServerError).JSON()
 			ctx.Abort()
 		}
