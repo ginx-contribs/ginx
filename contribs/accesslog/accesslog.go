@@ -2,9 +2,9 @@ package accesslog
 
 import (
 	"fmt"
-	"github.com/246859/ginx/constant/headers"
 	"github.com/dstgo/size"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx/constant/headers"
 	"log/slog"
 	"net/http/httputil"
 	"time"

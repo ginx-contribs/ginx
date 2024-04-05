@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/246859/ginx"
+	"github.com/ginx-contribs/ginx"
 	"log"
 )
 

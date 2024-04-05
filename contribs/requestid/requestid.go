@@ -1,8 +1,8 @@
 package requestid
 
 import (
-	"github.com/246859/ginx/constant/headers"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx/constant/headers"
 	"github.com/google/uuid"
 )
 

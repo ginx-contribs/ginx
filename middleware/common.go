@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"github.com/246859/ginx/constant/status"
-	"github.com/246859/ginx/contribs/accesslog"
-	"github.com/246859/ginx/contribs/cache"
-	"github.com/246859/ginx/contribs/cors"
-	"github.com/246859/ginx/contribs/ratelimit"
-	"github.com/246859/ginx/contribs/recovery"
-	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx/constant/status"
+	"github.com/ginx-contribs/ginx/contribs/accesslog"
+	"github.com/ginx-contribs/ginx/contribs/cache"
+	"github.com/ginx-contribs/ginx/contribs/cors"
+	"github.com/ginx-contribs/ginx/contribs/ratelimit"
+	"github.com/ginx-contribs/ginx/contribs/recovery"
+	"github.com/ginx-contribs/ginx/pkg/resp"
 	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"slices"

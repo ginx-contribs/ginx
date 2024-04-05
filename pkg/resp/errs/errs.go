@@ -1,8 +1,6 @@
 package errs
 
-import (
-	"github.com/246859/ginx/constant/status"
-)
+import "github.com/ginx-contribs/ginx/constant/status"
 
 // Error represents http response error, which is along with http status code,
 // it used to decide how to show error message in response.

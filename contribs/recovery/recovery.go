@@ -2,10 +2,10 @@ package recovery
 
 import (
 	"errors"
-	"github.com/246859/ginx/constant/status"
-	"github.com/246859/ginx/pkg/resp"
-	"github.com/246859/ginx/pkg/s2b"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx/constant/status"
+	"github.com/ginx-contribs/ginx/pkg/resp"
+	"github.com/ginx-contribs/ginx/pkg/s2b"
 	"log/slog"
 	"net"
 	"os"

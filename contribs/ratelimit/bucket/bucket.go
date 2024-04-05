@@ -1,8 +1,8 @@
 package bucket
 
 import (
-	ginxratelmit "github.com/246859/ginx/contribs/ratelimit"
 	"github.com/gin-gonic/gin"
+	ginxratelmit "github.com/ginx-contribs/ginx/contribs/ratelimit"
 	"github.com/juju/ratelimit"
 	"time"
 )

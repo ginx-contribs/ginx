@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/246859/ginx"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx"
 	"log"
 	"log/slog"
 )

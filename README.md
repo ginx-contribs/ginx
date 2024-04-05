@@ -9,7 +9,7 @@ ginx is a simple gin enhancer, features as follows:
 
 ## install
 ```bash
-go get github.com/246859/ginx@latest
+go get github.com/ginx-contribs/ginx@latest
 ```
 
 ## usage
@@ -20,7 +20,7 @@ see more examples in [ginx examples](https://github.com/246859/ginx/tree/main/ex
 package main
 
 import (
-	"github.com/246859/ginx"
+	"github.com/ginx-contribs/ginx"
 	"log"
 )
 
@@ -31,7 +31,6 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 ```
 
 ### meta group
@@ -41,8 +40,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/246859/ginx"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx"
 	"log"
 	"log/slog"
 )
@@ -88,8 +87,8 @@ see more middlewares at [ginx middlewares](https://github.com/246859/ginx/tree/m
 package main
 
 import (
-	"github.com/246859/ginx"
-	"github.com/246859/ginx/middleware"
+	"github.com/ginx-contribs/ginx"
+	"github.com/ginx-contribs/ginx/middleware"
 	"log"
 	"log/slog"
 	"time"
@@ -111,7 +110,6 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 ```
 
 ### response
@@ -120,10 +118,10 @@ ginx provides a unified response body and supports chain calling
 package main
 
 import (
-	"github.com/246859/ginx"
-	"github.com/246859/ginx/constant/status"
-	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx"
+	"github.com/ginx-contribs/ginx/constant/status"
+	"github.com/ginx-contribs/ginx/pkg/resp"
 	"log"
 )
 
@@ -143,5 +141,4 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 ```

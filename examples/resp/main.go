@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/246859/ginx"
-	"github.com/246859/ginx/constant/status"
-	"github.com/246859/ginx/pkg/resp"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx"
+	"github.com/ginx-contribs/ginx/constant/status"
+	"github.com/ginx-contribs/ginx/pkg/resp"
 	"log"
 )
 

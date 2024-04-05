@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/246859/ginx"
-	"github.com/246859/ginx/middleware"
+	"github.com/ginx-contribs/ginx"
+	"github.com/ginx-contribs/ginx/middleware"
 	"log"
 	"log/slog"
 	"time"

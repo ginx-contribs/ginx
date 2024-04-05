@@ -1,8 +1,8 @@
 package counter
 
 import (
-	"github.com/246859/ginx/contribs/ratelimit"
 	"github.com/gin-gonic/gin"
+	"github.com/ginx-contribs/ginx/contribs/ratelimit"
 	"golang.org/x/net/context"
 	"time"
 )
