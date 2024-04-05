@@ -1,4 +1,9 @@
 # ginx
+![Static Badge](https://img.shields.io/badge/go-1.22-blue)
+![GitHub License](https://img.shields.io/github/license/ginx-contribs/ginx)
+![go reports](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)
+
+
 ginx is a simple gin enhancer, features as follows:
 
 * lightweight and more convenient
