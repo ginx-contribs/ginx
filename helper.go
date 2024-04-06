@@ -1,10 +1,7 @@
 package ginx
 
 import (
-	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"log/slog"
 	"path"
 )
 
@@ -34,19 +31,3 @@ func lastHandler(chain gin.HandlersChain) gin.HandlerFunc {
 }
 
 const logPrefix = "[GinX]"
-
-func infoLog(ctx context.Context, prefix, msg string, args ...any) {
-	slog.InfoContext(ctx, fmt.Sprintf("%s %s", prefix, msg), args...)
-}
-
-func warnLog(ctx context.Context, prefix, msg string, args ...any) {
-	slog.WarnContext(ctx, fmt.Sprintf("%s %s", prefix, msg), args...)
-}
-
-func errorLog(ctx context.Context, prefix, msg string, args ...any) {
-	slog.ErrorContext(ctx, fmt.Sprintf("%s %s", prefix, msg), args...)
-}
-
-func debugLog(ctx context.Context, prefix, msg string, args ...any) {
-	slog.DebugContext(ctx, fmt.Sprintf("%s %s", prefix, msg), args...)
-}
