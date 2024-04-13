@@ -40,6 +40,9 @@ type Response struct {
 		Error string `json:"error,omitempty"`
 	}
 
+	// decide whether to show internal server error message in response body
+	transparent bool
+
 	status status.Status
 	err    error
 
@@ -71,6 +74,11 @@ func (resp *Response) Status(status status.Status) *Response {
 	return resp
 }
 
+func (resp *Response) Transparent() *Response {
+	resp.transparent = true
+	return resp
+}
+
 // render the response body
 func (resp *Response) render() {
 	ctx := resp.ctx
@@ -87,7 +95,7 @@ func (resp *Response) render() {
 		}
 
 		if resp.body.Error == "" {
-			if resp.status != status.InternalServerError {
+			if resp.transparent || resp.status != status.InternalServerError {
 				resp.body.Error = statusErr.Error()
 			} else {
 				// do not expose error msg for internal error,
