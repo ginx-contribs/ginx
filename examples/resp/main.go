@@ -18,7 +18,7 @@ func main() {
 
 	// {"code":1018,"error":"invalid access"}
 	root.GET("/error", func(ctx *gin.Context) {
-		resp.Fail(ctx).Error(errs.CodeWrapError(1018, "invalid access")).JSON()
+		resp.Fail(ctx).Error(errs.New().SetErrorf("invalid access").SetCode(1018)).JSON()
 	})
 	err := server.Spin()
 	if err != nil {
