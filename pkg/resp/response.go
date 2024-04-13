@@ -78,15 +78,12 @@ func (resp *Response) render() {
 		panic("nil *gin.Context in response")
 	}
 
-	if resp.body.Code == 0 {
-		resp.body.Code = resp.status.Code()
-	}
-
 	if resp.err != nil {
 		// if is status error
 		var statusErr errs.Error
 		if ok := errors.As(resp.err, &statusErr); ok {
 			resp.status = statusErr.Status
+			resp.body.Code = statusErr.Code
 		}
 
 		if resp.body.Error == "" {
@@ -98,11 +95,18 @@ func (resp *Response) render() {
 				resp.body.Error = status.InternalServerError.String()
 			}
 		}
+
+		// append error into context
 		resp.ctx.Error(resp.err)
 	}
 
+	// code fallback
+	if resp.body.Code == 0 {
+		resp.body.Code = resp.status.Code()
+	}
+
 	// fall back error msg
-	if resp.status.Code() >= 300 && resp.body.Error == "" {
+	if resp.status.Code() >= 400 && resp.body.Error == "" {
 		resp.body.Error = resp.status.String()
 	}
 }
