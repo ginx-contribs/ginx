@@ -157,7 +157,7 @@ func (s *Server) Spin() error {
 	notifyContext, signalCancel := signal.NotifyContext(s.ctx, s.stopSignals...)
 	defer signalCancel()
 
-	slog.DebugContext(s.ctx, "before starting hooks")
+	slog.DebugContext(s.ctx, "hooks before starting are executing")
 	// execute before starting hooks
 	err := s.executeHooks(notifyContext, s.BeforeStarting...)
 	if err != nil {
@@ -171,7 +171,7 @@ func (s *Server) Spin() error {
 		close(runCh)
 	}()
 
-	slog.DebugContext(s.ctx, "after starting hooks")
+	slog.DebugContext(s.ctx, "hooks after starting are executing")
 	// execute after started hooks
 	err = s.executeHooks(notifyContext, s.AfterStarted...)
 	if err != nil {
@@ -198,7 +198,7 @@ func (s *Server) Spin() error {
 	_ = s.Shutdown(timeoutCtx)
 
 	go func() {
-		slog.DebugContext(s.ctx, "on shutdown hooks")
+		slog.DebugContext(s.ctx, "hooks on shutdown are executing")
 		shutdownCh <- s.executeHooks(timeoutCtx, s.OnShutdown...)
 		close(shutdownCh)
 	}()
