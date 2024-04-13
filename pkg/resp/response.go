@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/ginx-contribs/ginx/constant/status"
-	"github.com/ginx-contribs/ginx/pkg/resp/errs"
+	"github.com/ginx-contribs/ginx/pkg/resp/statuserr"
 )
 
 func New(ctx *gin.Context) *Response {
@@ -80,7 +80,7 @@ func (resp *Response) render() {
 
 	if resp.err != nil {
 		// if is status error
-		var statusErr errs.Error
+		var statusErr statuserr.Error
 		if ok := errors.As(resp.err, &statusErr); ok {
 			resp.status = statusErr.Status
 			resp.body.Code = statusErr.Code

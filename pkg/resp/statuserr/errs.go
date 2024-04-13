@@ -1,4 +1,4 @@
-package errs
+package statuserr
 
 import (
 	"fmt"
