@@ -126,7 +126,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ginx-contribs/ginx"
 	"github.com/ginx-contribs/ginx/pkg/resp"
-	"github.com/ginx-contribs/ginx/pkg/resp/errs"
+	"github.com/ginx-contribs/ginx/pkg/resp/statuserr"
 	"log"
 )
 
@@ -140,7 +140,7 @@ func main() {
 
 	// {"code":1018,"error":"invalid access"}
 	root.GET("/error", func(ctx *gin.Context) {
-		resp.Fail(ctx).Error(errs.New().SetErrorf("invalid access").SetCode(1018)).JSON()
+		resp.Fail(ctx).Error(statuserr.New().SetErrorf("invalid access").SetCode(1018)).JSON()
 	})
 	err := server.Spin()
 	if err != nil {
