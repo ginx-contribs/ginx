@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"errors"
+	"fmt"
 	"github.com/ginx-contribs/ginx/constant/status"
 )
 
@@ -20,12 +20,17 @@ func (e Error) SetCode(code int) Error {
 	return e
 }
 
+func (e Error) SetErrorf(msg string, args ...any) Error {
+	e.Err = fmt.Errorf(msg, args...)
+	return e
+}
+
 func (e Error) SetError(err error) Error {
 	e.Err = err
 	return e
 }
 
-func (e Error) SetStatus(status status.Status) error {
+func (e Error) SetStatus(status status.Status) Error {
 	e.Status = status
 	return e
 }
@@ -37,30 +42,22 @@ func (e Error) Error() string {
 func New() Error {
 	return Error{}
 }
-
-func CodeWrapError(code int, errMsg string) Error {
-	return Error{Code: code, Err: errors.New(errMsg)}
-}
-
 func CodeError(code int, err error) Error {
 	return Error{Code: code, Err: err}
 }
-func StatusError(err error, status status.Status) Error {
-	return Error{Err: err, Status: status}
-}
 
 func BadRequest(err error) Error {
-	return StatusError(err, status.BadRequest)
+	return New().SetError(err).SetStatus(status.BadRequest)
 }
 
 func InternalError(err error) Error {
-	return StatusError(err, status.InternalServerError)
+	return New().SetError(err).SetStatus(status.InternalServerError)
 }
 
 func UnAuthorized(err error) Error {
-	return StatusError(err, status.Unauthorized)
+	return New().SetError(err).SetStatus(status.Unauthorized)
 }
 
 func Forbidden(err error) Error {
-	return StatusError(err, status.Forbidden)
+	return New().SetError(err).SetStatus(status.Forbidden)
 }
