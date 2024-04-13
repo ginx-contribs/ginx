@@ -38,12 +38,26 @@ func (e Error) SetStatus(status status.Status) Error {
 func (e Error) Error() string {
 	return e.Err.Error()
 }
-
 func New() Error {
 	return Error{}
 }
-func CodeError(code int, err error) Error {
-	return Error{Code: code, Err: err}
+
+// helper functions
+
+func Errorf(msg string, args ...any) Error {
+	return New().SetErrorf(msg, args...)
+}
+
+func Code(code int) Error {
+	return New().SetCode(code)
+}
+
+func Err(err error) Error {
+	return New().SetError(err)
+}
+
+func Status(status status.Status) Error {
+	return New().SetStatus(status)
 }
 
 func BadRequest(err error) Error {
