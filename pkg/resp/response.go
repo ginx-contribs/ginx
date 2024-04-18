@@ -96,7 +96,7 @@ func (resp *Response) render() {
 
 		if resp.body.Error == "" {
 			if resp.transparent || resp.status != status.InternalServerError {
-				resp.body.Error = statusErr.Error()
+				resp.body.Error = resp.err.Error()
 			} else {
 				// do not expose error msg for internal error,
 				// it will be passed to the context, and will be processed by others
