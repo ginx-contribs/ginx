@@ -90,7 +90,9 @@ func (resp *Response) render() {
 		// if is status error
 		var statusErr statuserr.Error
 		if ok := errors.As(resp.err, &statusErr); ok {
-			resp.status = statusErr.Status
+			if statusErr.Status.Code() != 0 {
+				resp.status = statusErr.Status
+			}
 			resp.body.Code = statusErr.Code
 		}
 
