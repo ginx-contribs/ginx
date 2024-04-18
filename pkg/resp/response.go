@@ -64,6 +64,11 @@ func (resp *Response) Error(err error) *Response {
 	return resp
 }
 
+func (resp *Response) ErrorMsg(msg string) *Response {
+	resp.body.Error = msg
+	return resp
+}
+
 func (resp *Response) Status(status status.Status) *Response {
 	resp.status = status
 	return resp
@@ -88,7 +93,9 @@ func (resp *Response) render() {
 			if statusErr.Status.Code() != 0 {
 				resp.status = statusErr.Status
 			}
-			resp.body.Code = statusErr.Code
+			if statusErr.Code != 0 {
+				resp.body.Code = statusErr.Code
+			}
 		}
 
 		if resp.body.Error == "" {
