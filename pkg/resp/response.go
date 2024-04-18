@@ -21,14 +21,9 @@ func Fail(ctx *gin.Context) *Response {
 	return &Response{ctx: ctx, status: status.BadRequest}
 }
 
-// Forbidden response with status code 403
-func Forbidden(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.Forbidden}
-}
-
-// UnAuthorized response with status code 401
-func UnAuthorized(ctx *gin.Context) *Response {
-	return &Response{ctx: ctx, status: status.Forbidden}
+// InternalError response with status code 500
+func InternalError(ctx *gin.Context) *Response {
+	return &Response{ctx: ctx, status: status.InternalServerError}
 }
 
 // Response represents a http json response
