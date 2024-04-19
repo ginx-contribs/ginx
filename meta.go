@@ -169,6 +169,14 @@ func (m MetaData) Has(key string) bool {
 	return has
 }
 
+func (m MetaData) Contains(v V) bool {
+	get, b := m.Get(v.Key)
+	if !b {
+		return false
+	}
+	return get == v
+}
+
 func (m MetaData) String() string {
 	var buf strings.Builder
 	buf.WriteString("{")
