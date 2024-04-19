@@ -206,12 +206,14 @@ func metaDataHandler(s *Server) gin.HandlerFunc {
 	}
 }
 
+var emptyMetaData = MetaData{}
+
 // MetaFromCtx get metadata of route itself from context
 func MetaFromCtx(ctx *gin.Context) MetaData {
 	routeKey := routeKey(ctx.Request.Method, ctx.FullPath())
 	metadata, exists := ctx.Get(_MetaKey + routeKey)
 	if !exists {
-		return nil
+		return emptyMetaData
 	}
 	return metadata.(MetaData)
 }
