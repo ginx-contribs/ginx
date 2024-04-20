@@ -7,6 +7,7 @@ import (
 	"github.com/dstgo/size"
 	"github.com/gin-gonic/gin"
 	"github.com/ginx-contribs/ginx/middleware"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"io"
 	"log/slog"
 	"net/http"
@@ -42,7 +43,9 @@ func Default() *Server {
 func New(options ...Option) *Server {
 
 	server := new(Server)
-	server.metadata = make(map[string]MetaData, 16)
+	server.metadata = &FrozenMap[string, routeMeta]{
+		m: cmap.New[routeMeta](),
+	}
 
 	for _, option := range options {
 		option(server)
@@ -120,7 +123,7 @@ type Server struct {
 
 	// metadata is a ready-only map during server running, which holds all the route metadata.
 	// It is not thread-safe, should not be modified after server running.
-	metadata map[string]MetaData
+	metadata *FrozenMap[string, routeMeta]
 
 	// os stop signals
 	stopSignals []os.Signal
@@ -138,6 +141,7 @@ func (s *Server) Engine() *gin.Engine {
 
 // Run just run the http server without hooks, you should use *Server.Spin` im most time.
 func (s *Server) Run() error {
+	s.metadata.Frozen()
 	if s.options.TLS != nil {
 		slog.InfoContext(s.ctx, "tls certificate has been configured")
 		slog.InfoContext(s.ctx, fmt.Sprintf("server is listiening at %v", s.options.Address))
@@ -275,7 +279,7 @@ func (s *Server) applyOptions() {
 	}
 
 	// apply middlewares
-	s.engine.Use(metaDataHandler(s))
+	s.engine.Use(metaDataHandler(s.metadata))
 	s.engine.Use(s.middlewares...)
 	s.engine.NoMethod(s.noMethod...)
 	s.engine.NoRoute(s.noRoute...)

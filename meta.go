@@ -11,9 +11,12 @@ import (
 type M []V
 
 func (m M) build() MetaData {
-	metadata := make(MetaData)
+	if len(m) == 0 {
+		return emptyMetaData
+	}
+	metadata := newMetaData()
 	for _, value := range m {
-		metadata[value.Key] = value.Val
+		metadata.set(value.Key, value.Val)
 	}
 	return metadata
 }
@@ -140,15 +143,33 @@ func (v V) Duration() time.Duration {
 	return 0
 }
 
+func newMetaData() MetaData {
+	return MetaData{m: make(map[string]any, 4)}
+}
+
 // MetaData is a read map store in memory
-type MetaData map[string]any
+type MetaData struct {
+	m map[string]any
+}
 
 func (m MetaData) Get(key string) (V, bool) {
-	v, e := m[key]
+	v, e := m.m[key]
 	if !e {
 		return V{}, false
 	}
 	return V{Key: key, Val: v}, true
+}
+
+func (m MetaData) set(k string, v any) {
+	m.m[k] = v
+}
+
+func (m MetaData) applyM(meta MetaData) {
+	for k, v := range meta.m {
+		if !m.Has(k) {
+			m.set(k, v)
+		}
+	}
 }
 
 func (m MetaData) ShouldGet(key string) V {
@@ -181,9 +202,9 @@ func (m MetaData) String() string {
 	var buf strings.Builder
 	buf.WriteString("{")
 	i := 0
-	for k, v := range m {
+	for k, v := range m.m {
 		buf.WriteString(fmt.Sprintf("%s:%v", k, v))
-		if i < len(m)-1 {
+		if i < len(m.m)-1 {
 			buf.WriteString(",")
 		}
 		i++
@@ -192,21 +213,30 @@ func (m MetaData) String() string {
 	return buf.String()
 }
 
+var emptyRouteMeta = routeMeta{MetaData: emptyMetaData}
+
+type routeMeta struct {
+	MetaData MetaData
+	FullPath string
+	Method   string
+	// group
+	Group *RouterGroup
+}
+
 const _MetaKey = "github.com/246859/ginx.metadata"
 
 // metaDataHandler get metadata for each route from the global metadata, then store in the context
-func metaDataHandler(s *Server) gin.HandlerFunc {
-	if s.metadata == nil {
-		s.metadata = make(map[string]MetaData, 16)
-	}
+func metaDataHandler(metadata *FrozenMap[string, routeMeta]) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		routeKey := routeKey(ctx.Request.Method, ctx.FullPath())
-		routeMeta := s.metadata[routeKey]
-		ctx.Set(_MetaKey+routeKey, routeMeta)
+		key := routeKey(ctx.Request.Method, ctx.FullPath())
+		src, e := metadata.Get(key)
+		if e {
+			ctx.Set(_MetaKey+key, src.MetaData)
+		}
 	}
 }
 
-var emptyMetaData = MetaData{}
+var emptyMetaData = MetaData{m: map[string]any{}}
 
 // MetaFromCtx get metadata of route itself from context
 func MetaFromCtx(ctx *gin.Context) MetaData {

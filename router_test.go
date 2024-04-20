@@ -9,7 +9,7 @@ func TestRouter(t *testing.T) {
 	server := Default()
 	root := server.RouterGroup()
 	root.MGET("login", M{{"role", "guest"}, {"limit", 5}})
-	user := root.MGroup("user", nil)
+	user := root.MGroup("user", M{{"a", "b"}})
 	user.MGET("info", M{{"role", "user"}}, nil)
 
 	root.Walk(func(info RouteInfo) {

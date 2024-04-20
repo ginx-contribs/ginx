@@ -26,12 +26,24 @@ type RouterHandler struct {
 
 func (handler *RouterHandler) applyMeta(meta M) {
 	key := routeKey(handler.Method, handler.FullPath)
-	handler.group.s.metadata[key] = meta.build()
+	handler.group.s.metadata.Set(key, routeMeta{
+		MetaData: meta.build(),
+		FullPath: handler.FullPath,
+		Method:   handler.Method,
+		Group:    handler.group,
+	})
 }
 
-func (handler *RouterHandler) getMeta() MetaData {
+func (handler *RouterHandler) getMeta() routeMeta {
 	key := routeKey(handler.Method, handler.FullPath)
-	return handler.group.s.metadata[key]
+	meta, e := handler.group.s.metadata.Get(key)
+	if !e {
+		return emptyRouteMeta
+	}
+	if meta.Group != nil {
+		meta.MetaData.applyM(meta.Group.getMeta().MetaData)
+	}
+	return meta
 }
 
 // RouterGroup returns metadata route group
@@ -56,18 +68,31 @@ func (group *RouterGroup) Use(handlers ...gin.HandlerFunc) {
 // register registers meta info into *Server.metadata
 func (group *RouterGroup) applyMeta(meta M) {
 	routeKey := routeKey("group", group.current.BasePath())
-	group.s.metadata[routeKey] = meta.build()
+	group.s.metadata.Set(routeKey, routeMeta{
+		MetaData: meta.build(),
+		FullPath: group.current.BasePath(),
+		Group:    group.group,
+	})
 }
 
-func (group *RouterGroup) getMeta() MetaData {
+// getMeta returns meta info from *Server.metadata and its groups
+func (group *RouterGroup) getMeta() routeMeta {
 	routeKey := routeKey("group", group.current.BasePath())
-	return group.s.metadata[routeKey]
+	meta, e := group.s.metadata.Get(routeKey)
+	if !e {
+		return emptyRouteMeta
+	}
+	if meta.Group != nil {
+		meta.MetaData.applyM(meta.Group.getMeta().MetaData)
+	}
+	return meta
 }
 
 func (group *RouterGroup) Group(path string, handlers ...gin.HandlerFunc) *RouterGroup {
 	return group.MGroup(path, nil, handlers...)
 }
 
+// MGroup creates a new router group with the given metadata that will ba applied into its sub handlers.
 func (group *RouterGroup) MGroup(path string, meta M, handlers ...gin.HandlerFunc) *RouterGroup {
 	// register route
 	newGroup := group.current.Group(path, handlers...)
@@ -184,7 +209,7 @@ func (group *RouterGroup) Walk(walkFn func(info RouteInfo)) {
 	groupInfo := RouteInfo{
 		IsGroup:  true,
 		FullPath: group.current.BasePath(),
-		Meta:     group.getMeta(),
+		Meta:     group.getMeta().MetaData,
 	}
 	infoList = append(infoList, groupInfo)
 
@@ -195,7 +220,7 @@ func (group *RouterGroup) Walk(walkFn func(info RouteInfo)) {
 			Method:   handler.Method,
 			FullPath: handler.FullPath,
 			Handler:  lastHandler(handler.chain),
-			Meta:     handler.getMeta(),
+			Meta:     handler.getMeta().MetaData,
 			Group:    &groupInfo,
 		})
 	}
