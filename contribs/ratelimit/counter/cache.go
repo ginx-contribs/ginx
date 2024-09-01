@@ -1,7 +1,6 @@
 package counter
 
 import (
-	"fmt"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/net/context"
 	"sync"
@@ -30,6 +29,5 @@ func (c *CacheCounter) Count(ctx context.Context, key string, limit int, window 
 		c.cache.IncrementInt(key, 1)
 	}
 	get, _ := c.cache.Get(key)
-	fmt.Println(get)
 	return get.(int), nil
 }
