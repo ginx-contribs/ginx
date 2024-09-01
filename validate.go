@@ -20,27 +20,15 @@ type Validator interface {
 	HandleError(ctx *gin.Context, val any, err error)
 }
 
-func NewHumanizedValidator(v *validator.Validate, translator unitrans.Translator) *HumanizedValidator {
-	return &HumanizedValidator{v: v, translator: translator}
+func NewHumanizedValidator(v *validator.Validate, translator unitrans.Translator, cb ValidateTranslator) *HumanizedValidator {
+	return &HumanizedValidator{v: v, translator: translator, cb: cb}
 }
 
 // HumanizedValidator return human-readable validation result information
 type HumanizedValidator struct {
 	translator unitrans.Translator
 	v          *validator.Validate
-}
-
-func (h *HumanizedValidator) HandleError(ctx *gin.Context, val any, err error) {
-	var validationErrors validator.ValidationErrors
-	if errors.As(err, &validationErrors) {
-		var errorMsg []string
-		for _, validateErr := range validationErrors {
-			errorMsg = append(errorMsg, validateErr.Translate(h.translator))
-		}
-		resp.Fail(ctx).ErrorMsg(strings.Join(errorMsg, ",")).JSON()
-		return
-	}
-	resp.Fail(ctx).ErrorMsg("params validate failed").JSON()
+	cb         func(ctx *gin.Context, val any, err error, translator unitrans.Translator)
 }
 
 func (h *HumanizedValidator) ValidateStruct(a any) error {
@@ -51,13 +39,19 @@ func (h *HumanizedValidator) Engine() any {
 	return h.v
 }
 
+func (h *HumanizedValidator) HandleError(ctx *gin.Context, val any, err error) {
+	if h.cb != nil {
+		h.cb(ctx, val, err, h.translator)
+	}
+}
+
 // SetValidator replace the default validator for binding packages
 func SetValidator(structValidator binding.StructValidator) {
 	binding.Validator = structValidator
 }
 
 // EnglishValidator create a validator can return human-readable parameters validation information with language english.
-func EnglishValidator(v *validator.Validate) (*HumanizedValidator, error) {
+func EnglishValidator(v *validator.Validate, cb ValidateTranslator) (*HumanizedValidator, error) {
 	localeEn := localeen.New()
 	universalTranslator := unitrans.New(localeEn)
 	enTrans, _ := universalTranslator.GetTranslator(localeEn.Locale())
@@ -74,7 +68,10 @@ func EnglishValidator(v *validator.Validate) (*HumanizedValidator, error) {
 		}
 		return field.Name
 	})
-	return NewHumanizedValidator(v, enTrans), nil
+	if cb == nil {
+		cb = defaultValidateErrTranslator
+	}
+	return NewHumanizedValidator(v, enTrans, cb), nil
 }
 
 // ValidateHandler will be called if validate failed.
@@ -84,6 +81,23 @@ var defaultValidateHandler ValidateHandler
 
 func SetValidateHandler(handler ValidateHandler) {
 	defaultValidateHandler = handler
+}
+
+// ValidateTranslator translates validation error information
+type ValidateTranslator func(ctx *gin.Context, val any, err error, translator unitrans.Translator)
+
+func defaultValidateErrTranslator(ctx *gin.Context, val any, err error, translator unitrans.Translator) {
+	var validationErrors validator.ValidationErrors
+	if errors.As(err, &validationErrors) {
+		var errorMsg []string
+		for _, validateErr := range validationErrors {
+			errorMsg = append(errorMsg, validateErr.Translate(translator))
+		}
+		// this error will be shown in access log
+		resp.Fail(ctx).Error(errors.New(strings.Join(errorMsg, ","))).JSON()
+		return
+	}
+	resp.Fail(ctx).Error(errors.New("params validate failed")).JSON()
 }
 
 func ShouldValidateWith(ctx *gin.Context, val any, binding binding.Binding) error {
